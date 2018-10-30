@@ -26,25 +26,39 @@ function scroll() {
   });
 
   function scrollToElement(nodeElement) {
-    var scrollDistance = document.documentElement.scrollTop + nodeElement.getBoundingClientRect().top - navMenu.clientHeight;
+    var duration = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 250;
+    var currPos = document.documentElement.scrollTop,
+        elementPos = nodeElement.getBoundingClientRect().top - navMenu.clientHeight,
+        targetPos = currPos + elementPos;
     var animationID,
-        step = 1; // shift();
+        step = targetPos / duration; // if (targetPos < 0){
+    //   step *= -1;
+    // }
+    // shiftPos(startTime);
 
-    scrollTo(0, scrollDistance);
+    shiftPos(); // scrollTo(0, scrollDistance);
 
-    function shift() {
-      animationID = requestAnimationFrame(shift);
+    function shiftPos(pastTime) {
+      if (elementPos > 0) {
+        currPos += step;
 
-      if (document.documentElement.scrollTop === scrollDistance) {
+        if (currPos - targetPos > 0) {
+          currPos = targetPos;
+        }
+      } else {
+        currPos -= step;
+
+        if (currPos - targetPos < 0) {
+          currPos = targetPos;
+        }
+      }
+
+      scrollTo(0, currPos);
+      animationID = requestAnimationFrame(shiftPos);
+
+      if (currPos === targetPos) {
         cancelAnimationFrame(animationID);
-      } // todo: add more checks for step > 1
-      // todo: add check what to do if element is not reachable by scrollTo() (like footer)
-      // if (document.documentElement.scrollTop < scrollDistance){
-      //   scrollTo(0, document.documentElement.scrollTop + step);
-      // }else if (document.documentElement.scrollTop > scrollDistance){
-      //   scrollTo(0, document.documentElement.scrollTop - step);
-      // }
-
+      }
     }
   }
 }
